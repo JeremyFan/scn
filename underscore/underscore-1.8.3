@@ -12,12 +12,15 @@
   var root = this;
 
   // Save the previous value of the `_` variable.
+  // 保存原来的`_`变量
   var previousUnderscore = root._;
 
   // Save bytes in the minified (but not gzipped) version:
+  // 缓存常用的原型，节省min版本的空间（混淆成短变量名）
   var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
 
   // Create quick reference variables for speed access to core prototypes.
+  // 缓存常用数组、对象方法
   var
     push             = ArrayProto.push,
     slice            = ArrayProto.slice,
@@ -26,6 +29,7 @@
 
   // All **ECMAScript 5** native function implementations that we hope to use
   // are declared here.
+  // 缓存原生的ES5方法，这些方法会被优先使用
   var
     nativeIsArray      = Array.isArray,
     nativeKeys         = Object.keys,
@@ -33,6 +37,7 @@
     nativeCreate       = Object.create;
 
   // Naked function reference for surrogate-prototype-swapping.
+  // 空构造函数，用于实现继承
   var Ctor = function(){};
 
   // Create a safe reference to the Underscore object for use below.
@@ -60,6 +65,7 @@
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
   // functions.
+  // apply与call性能：https://jsperf.com/call-apply-segu
   var optimizeCb = function(func, context, argCount) {
     if (context === void 0) return func;
     switch (argCount == null ? 3 : argCount) {
@@ -85,11 +91,18 @@
   // to each element in a collection, returning the desired result — either
   // identity, an arbitrary callback, a property matcher, or a property accessor.
   var cb = function(value, context, argCount) {
+    // null，返回默认迭代器（返回参数原值）
     if (value == null) return _.identity;
+    // 函数，返回一个优化后的cb
     if (_.isFunction(value)) return optimizeCb(value, context, argCount);
+    // 对象，返回一个_.matcher()生成的迭代器（匹配参数所有的键/值）
     if (_.isObject(value)) return _.matcher(value);
+    // 字符串、数值，返回一个取属性的函数
     return _.property(value);
   };
+
+  // 根据value不同类型的值，生成迭代器
+  // 详见函数cb中的注释
   _.iteratee = function(value, context) {
     return cb(value, context, Infinity);
   };
@@ -113,6 +126,8 @@
   };
 
   // An internal function for creating a new object that inherits from another.
+  // 继承原型，返回新对象
+  // 使用Object.create或传统的原型链继承
   var baseCreate = function(prototype) {
     if (!_.isObject(prototype)) return {};
     if (nativeCreate) return nativeCreate(prototype);
@@ -122,6 +137,10 @@
     return result;
   };
 
+  // 生成一个取对象属性的函数
+  // 文档中的例子：
+  // var stooge = {name: 'moe'};
+  // _.property('name')(stooge); // moe
   var property = function(key) {
     return function(obj) {
       return obj == null ? void 0 : obj[key];
