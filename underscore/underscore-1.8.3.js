@@ -208,9 +208,12 @@
   };
 
   // Create a reducing function iterating left or right.
+  // @param dir 计算方向
   function createReduce(dir) {
     // Optimized iterator function as using arguments.length
     // in the main function will deoptimize the, see #1991.
+    //
+    // 参数：需要reduce的对象、计算规则、属性列表、开始的索引、循环的长度
     function iterator(obj, iteratee, memo, keys, index, length) {
       for (; index >= 0 && index < length; index += dir) {
         var currentKey = keys ? keys[index] : index;
@@ -223,8 +226,10 @@
       iteratee = optimizeCb(iteratee, context, 4);
       var keys = !isArrayLike(obj) && _.keys(obj),
           length = (keys || obj).length,
+          // 根据方向计算开始循环的位置
           index = dir > 0 ? 0 : length - 1;
       // Determine the initial value if none is provided.
+      // 如果没有传memo（初始值），就取第一个索引或属性作为memo，然后把索引往前进一位
       if (arguments.length < 3) {
         memo = obj[keys ? keys[index] : index];
         index += dir;
@@ -241,6 +246,7 @@
   _.reduceRight = _.foldr = createReduce(-1);
 
   // Return the first value which passes a truth test. Aliased as `detect`.
+  // 先找索引或属性，再取值
   _.find = _.detect = function(obj, predicate, context) {
     var key;
     if (isArrayLike(obj)) {
@@ -644,6 +650,8 @@
   };
 
   // Generator function to create the findIndex and findLastIndex functions
+  // 根据方向查找索引位置
+  // 又见到这样的抽象，区别只是遍历方向和起始遍历位置
   function createPredicateIndexFinder(dir) {
     return function(array, predicate, context) {
       predicate = cb(predicate, context);
