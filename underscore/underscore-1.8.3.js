@@ -247,6 +247,7 @@
 
   // Return the first value which passes a truth test. Aliased as `detect`.
   // 先找索引或属性，再取值
+  // @param predicate 谓词函数/判定函数，返回布尔值
   _.find = _.detect = function(obj, predicate, context) {
     var key;
     if (isArrayLike(obj)) {
@@ -262,13 +263,16 @@
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
     predicate = cb(predicate, context);
+    // _.each遍历
     _.each(obj, function(value, index, list) {
+      // 满足谓词函数的项push到results
       if (predicate(value, index, list)) results.push(value);
     });
     return results;
   };
 
   // Return all the elements for which a truth test fails.
+  // 与_.filter相反，返回所有不满足谓词函数的项
   _.reject = function(obj, predicate, context) {
     return _.filter(obj, _.negate(cb(predicate)), context);
   };
@@ -277,32 +281,43 @@
   // Aliased as `all`.
   _.every = _.all = function(obj, predicate, context) {
     predicate = cb(predicate, context);
+    // 如果不是类数组，取属性列表
     var keys = !isArrayLike(obj) && _.keys(obj),
         length = (keys || obj).length;
+    // 按index遍历
     for (var index = 0; index < length; index++) {
+      // 取属性（不是类数组对象）或索引
       var currentKey = keys ? keys[index] : index;
+      // 如果某项不满足谓词函数，直接return false
       if (!predicate(obj[currentKey], currentKey, obj)) return false;
     }
+    // 所有项都通过谓词函数，走到这里
     return true;
   };
 
   // Determine if at least one element in the object matches a truth test.
   // Aliased as `any`.
+  // 实现和_.every基本一样
   _.some = _.any = function(obj, predicate, context) {
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
         length = (keys || obj).length;
     for (var index = 0; index < length; index++) {
       var currentKey = keys ? keys[index] : index;
+      // 有某项满足谓词函数，直接return true
       if (predicate(obj[currentKey], currentKey, obj)) return true;
     }
+    // 所有项都不满足谓词函数，走到这里
     return false;
   };
 
   // Determine if the array or object contains a given item (using `===`).
   // Aliased as `includes` and `include`.
+  // @todo guard参数？
   _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
     if (!isArrayLike(obj)) obj = _.values(obj);
+    // fromIndex没传数值时置为0我能理解
+    // guard为真时置为0有什么作用？内部并没有使用guard的调用，文档中也只说接收3个参数
     if (typeof fromIndex != 'number' || guard) fromIndex = 0;
     return _.indexOf(obj, item, fromIndex) >= 0;
   };
@@ -895,6 +910,7 @@
   };
 
   // Returns a negated version of the passed-in predicate.
+  // 接收一个谓词函数，返回一个相反的谓词函数
   _.negate = function(predicate) {
     return function() {
       return !predicate.apply(this, arguments);
@@ -978,6 +994,7 @@
     var keys = [];
     for (var key in obj) if (_.has(obj, key)) keys.push(key);
     // Ahem, IE < 9.
+    // IE for...in枚举bug
     if (hasEnumBug) collectNonEnumProps(obj, keys);
     return keys;
   };
@@ -994,6 +1011,7 @@
   };
 
   // Retrieve the values of an object's properties.
+  // 取对象的属性值列表
   _.values = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
