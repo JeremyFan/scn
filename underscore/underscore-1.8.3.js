@@ -324,27 +324,36 @@
 
   // Invoke a method (with arguments) on every item in a collection.
   _.invoke = function(obj, method) {
+    // 接收后续的参数作为调用method的参数
     var args = slice.call(arguments, 2);
     var isFunc = _.isFunction(method);
     return _.map(obj, function(value) {
+      // 可以传方法，也可以传属性
       var func = isFunc ? method : value[method];
       return func == null ? func : func.apply(value, args);
     });
   };
 
+
   // Convenience version of a common use case of `map`: fetching a property.
+  // map的常用场景
+  // 抓取对象数组中指定的属性值
   _.pluck = function(obj, key) {
     return _.map(obj, _.property(key));
   };
 
   // Convenience version of a common use case of `filter`: selecting only objects
   // containing specific `key:value` pairs.
+  // filter的常用场景
+  // 取对象数组中包含指定键值对的对象
   _.where = function(obj, attrs) {
     return _.filter(obj, _.matcher(attrs));
   };
 
   // Convenience version of a common use case of `find`: getting the first object
   // containing specific `key:value` pairs.
+  // find的常用场景
+  // 与_.where类似，但返回的是第一个包含指定键值对的对象
   _.findWhere = function(obj, attrs) {
     return _.find(obj, _.matcher(attrs));
   };
@@ -353,7 +362,9 @@
   _.max = function(obj, iteratee, context) {
     var result = -Infinity, lastComputed = -Infinity,
         value, computed;
+    // 没有传迭代器，直接比较数组的项 或 对象的所有属性值
     if (iteratee == null && obj != null) {
+      // 如果是对象，取对象属性值数组
       obj = isArrayLike(obj) ? obj : _.values(obj);
       for (var i = 0, length = obj.length; i < length; i++) {
         value = obj[i];
@@ -361,9 +372,12 @@
           result = value;
         }
       }
-    } else {
+    } 
+    // 传了迭代器，则先用迭代器计算每一项的值
+    else {
       iteratee = cb(iteratee, context);
       _.each(obj, function(value, index, list) {
+        // 得出计算值比较
         computed = iteratee(value, index, list);
         if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
           result = value;
@@ -375,6 +389,7 @@
   };
 
   // Return the minimum element (or element-based computation).
+  // _.min的代码结构、逻辑和_.max是一样的
   _.min = function(obj, iteratee, context) {
     var result = Infinity, lastComputed = Infinity,
         value, computed;
