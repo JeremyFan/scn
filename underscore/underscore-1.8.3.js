@@ -416,13 +416,18 @@
 
   // Shuffle a collection, using the modern version of the
   // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  // 一个经典的洗牌算法
+  // 循环整个集合，将当前索引项与当前索引项之前的随机一项交换位置
   _.shuffle = function(obj) {
     var set = isArrayLike(obj) ? obj : _.values(obj);
     var length = set.length;
     var shuffled = Array(length);
     for (var index = 0, rand; index < length; index++) {
+      // 0~当前索引随机一个位置
       rand = _.random(0, index);
+      // 随机项赋给当前索引
       if (rand !== index) shuffled[index] = shuffled[rand];
+      // 当前项赋给随机索引
       shuffled[rand] = set[index];
     }
     return shuffled;
@@ -431,11 +436,16 @@
   // Sample **n** random values from a collection.
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
+  // 从集合中随机取值
+  // @param n {Number} 取值个数
+  // @todo guard?
   _.sample = function(obj, n, guard) {
     if (n == null || guard) {
       if (!isArrayLike(obj)) obj = _.values(obj);
+      // 未指定取值个数，取一个
       return obj[_.random(obj.length - 1)];
     }
+    // 打乱集合，取前n项
     return _.shuffle(obj).slice(0, Math.max(0, n));
   };
 
@@ -1401,7 +1411,9 @@
   };
 
   // Return a random integer between min and max (inclusive).
+  // 指定范围内随机一个整数值
   _.random = function(min, max) {
+    // 只传一个参数时，默认随机[0, 参数值]
     if (max == null) {
       max = min;
       min = 0;
