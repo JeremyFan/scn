@@ -462,7 +462,7 @@
         value: value,
         // 索引（排序用）
         index: index,
-        // 根据传入的迭代器（即排序规则）生成的值
+        // 根据传入的迭代器（即对值的处理规则）生成的新的值
         criteria: iteratee(value, index, list)
       };
     }).sort(function(left, right) {
