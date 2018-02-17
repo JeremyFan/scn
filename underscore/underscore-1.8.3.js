@@ -450,31 +450,43 @@
   };
 
   // Sort the object's values by a criterion produced by an iteratee.
+  // 排序
+  // 第1步：map出一个新数组供排序用，包括值value，索引index，排序规则生成的值criteria
+  // 第2步：根据criteria和index排序
+  // 第3步：摘出value
   _.sortBy = function(obj, iteratee, context) {
     iteratee = cb(iteratee, context);
     return _.pluck(_.map(obj, function(value, index, list) {
       return {
+        // 原有项
         value: value,
+        // 索引（排序用）
         index: index,
+        // 根据传入的迭代器（即排序规则）生成的值
         criteria: iteratee(value, index, list)
       };
     }).sort(function(left, right) {
       var a = left.criteria;
       var b = right.criteria;
+      // 按criteria排序
       if (a !== b) {
         if (a > b || a === void 0) return 1;
         if (a < b || b === void 0) return -1;
       }
+      // 值相同，按index索引位置排序，即保持原有位置
       return left.index - right.index;
     }), 'value');
   };
 
   // An internal function used for aggregate "group by" operations.
+  // @param behavior {Function} 一个行为函数，定义如何根据聚合key把value放入结果集。
+  // 可以参见_.groupBy，_.indexBy，_.countBy的调用方式
   var group = function(behavior) {
     return function(obj, iteratee, context) {
       var result = {};
       iteratee = cb(iteratee, context);
       _.each(obj, function(value, index) {
+        // 根据聚合规则生成一个key
         var key = iteratee(value, index, obj);
         behavior(result, value, key);
       });
@@ -484,12 +496,20 @@
 
   // Groups the object's values by a criterion. Pass either a string attribute
   // to group by, or a function that returns the criterion.
+  //
+  // 为每个聚合key分配一个数组，保留聚合到这个key的所有值
+  // _.groupBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); });
+  // => {1: [1.3], 2: [2.1, 2.4]}
   _.groupBy = group(function(result, value, key) {
     if (_.has(result, key)) result[key].push(value); else result[key] = [value];
   });
 
   // Indexes the object's values by a criterion, similar to `groupBy`, but for
   // when you know that your index values will be unique.
+  //
+  // 为每个聚合key分配一个值，所以只能保留聚合到这个key的最后一个对象
+  // _.indexBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); });
+  // => {1: 1.3, 2: 2.4}
   _.indexBy = group(function(result, value, key) {
     result[key] = value;
   });
@@ -497,30 +517,44 @@
   // Counts instances of an object that group by a certain criterion. Pass
   // either a string attribute to count by, or a function that returns the
   // criterion.
+  // 
+  // 计算每个聚合key值的个数
+  // _.countBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); });
+  // => {1: 1, 2: 2}
   _.countBy = group(function(result, value, key) {
     if (_.has(result, key)) result[key]++; else result[key] = 1;
   });
 
   // Safely create a real, live array from anything iterable.
+  // 创建一个真数组
+  // @param obj {Object} 接收数组、类数组对象、对象
   _.toArray = function(obj) {
     if (!obj) return [];
+    // 数组，直接返回一个拷贝
     if (_.isArray(obj)) return slice.call(obj);
+    // 类数组对象，map出一个数组
     if (isArrayLike(obj)) return _.map(obj, _.identity);
+    // 对象，取每个属性的值组成数组
     return _.values(obj);
   };
 
   // Return the number of elements in an object.
+  // 求数组长度
   _.size = function(obj) {
     if (obj == null) return 0;
+    // 返回length值或对象属性个数
     return isArrayLike(obj) ? obj.length : _.keys(obj).length;
   };
 
   // Split a collection into two arrays: one whose elements all satisfy the given
   // predicate, and one whose elements all do not satisfy the predicate.
+  // 根据判定函数分割数组
+  // @return {Array} [[通过判定函数的项],[未通过判定函数的项]]
   _.partition = function(obj, predicate, context) {
     predicate = cb(predicate, context);
     var pass = [], fail = [];
     _.each(obj, function(value, key, obj) {
+      // 这个表达式可以
       (predicate(value, key, obj) ? pass : fail).push(value);
     });
     return [pass, fail];
