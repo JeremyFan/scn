@@ -202,6 +202,8 @@
       // bar=new Array(10000000);for(var i=0;i<10000000;i++) {bar[i]=i};
       // 性能优于
       // for(var i=0;i<10000000;i++) {foo.push(i)};
+      // 
+      // 会传给遍历器3个参数，如果以_.first等函数作为遍历器，第3个参数guard会发挥作用
       results[index] = iteratee(obj[currentKey], currentKey, obj);
     }
     return results;
@@ -566,6 +568,10 @@
   // Get the first element of an array. Passing **n** will return the first N
   // values in the array. Aliased as `head` and `take`. The **guard** check
   // allows it to work with `_.map`.
+  // 取数组的前n个元素（默认取1个）
+  // guard的作用：
+  // _.map([ [1, 2, 3], [4, 5, 6] ], _.first)
+  // => [1, 4]
   _.first = _.head = _.take = function(array, n, guard) {
     if (array == null) return void 0;
     if (n == null || guard) return array[0];
@@ -575,12 +581,16 @@
   // Returns everything but the last entry of the array. Especially useful on
   // the arguments object. Passing **n** will return all the values in
   // the array, excluding the last N.
+  // 取数组除后n个元素外的所有元素
   _.initial = function(array, n, guard) {
+    // 虽然slice可以接收负数，
+    // 但对于_.initial，传一个大于数组长度的n是没有意义的
     return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
   };
 
   // Get the last element of an array. Passing **n** will return the last N
   // values in the array.
+  // 取数组后n个元素
   _.last = function(array, n, guard) {
     if (array == null) return void 0;
     if (n == null || guard) return array[array.length - 1];
@@ -590,16 +600,40 @@
   // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
   // Especially useful on the arguments object. Passing an **n** will return
   // the rest N values in the array.
+  // 取数组除了前n个元素外的所有元素
+  // 被打脸了，这里为啥不Math.max()一下
   _.rest = _.tail = _.drop = function(array, n, guard) {
     return slice.call(array, n == null || guard ? 1 : n);
   };
 
   // Trim out all falsy values from an array.
+  // 过滤掉数组中所有值为false的元素
   _.compact = function(array) {
     return _.filter(array, _.identity);
   };
 
   // Internal implementation of a recursive `flatten` function.
+  /**
+   * 数组扁平化处理
+   * @param {Array} input 待处理数组
+   * @param {Boolean} shallow 是否浅扁平 如果传true进来，就只处理第一层级了
+   * @param {Boolean} strict 是否过滤非数组元素
+   * @param {Number} startIndex 起始操作位置
+   * 
+   * 再单独解释一下strict这个参数
+   * 这个参数字面意思是严格模式，表示是否过滤掉非数组的元素（严格要求每一项必须是数组）
+   * 如果是深度扁平，扁平到底每一项一定是非数组，这时候strict传true是没有意义的，最终结果会返回一个空数组
+   * 如果只扁平一层（shallow传true），这时候strict传true，效果就是把单个元素过滤掉，只扁数组元素
+   * 
+   * flatten([1,[2,[3]]])
+   * => [1, 2, 3] // 深扁平
+   * flatten([1,[2,[3]]],true)
+   * => [1, 2, [3]] // 浅扁平
+   * flatten([1,[2,[3]]], false, true)
+   * => [] // 深扁平并过滤非数组元素，只能是[]
+   * flatten([1,[2,[3]]], true, true)
+   * => [2, [3]] // 浅扁平过滤非数组元素，1被过滤掉了
+   */
   var flatten = function(input, shallow, strict, startIndex) {
     var output = [], idx = 0;
     for (var i = startIndex || 0, length = getLength(input); i < length; i++) {
@@ -608,11 +642,16 @@
         //flatten current level of array or arguments object
         if (!shallow) value = flatten(value, shallow, strict);
         var j = 0, len = value.length;
+        // @todo 为啥需要计算length，性能？待测试
         output.length += len;
         while (j < len) {
           output[idx++] = value[j++];
         }
-      } else if (!strict) {
+      } 
+      // 走到else这里是value不是数组的情况
+      // 如果这里strict是true，就不会执行这个赋值操作，
+      // 也就是最终的结果里不会有这个value，会被过滤掉！
+      else if (!strict) {
         output[idx++] = value;
       }
     }
@@ -620,6 +659,7 @@
   };
 
   // Flatten out an array, either recursively (by default), or just one level.
+  // 扁平化数组，可控制深浅
   _.flatten = function(array, shallow) {
     return flatten(array, shallow, false);
   };
