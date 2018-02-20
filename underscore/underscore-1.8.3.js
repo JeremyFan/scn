@@ -665,6 +665,8 @@
   };
 
   // Return a version of the array that does not contain the specified value(s).
+  // 给定一个数组和一组值，返回一个不包含这组值的新数组
+  // 和_.difference类似，但接收的参数是值，内部是把参数转成数组调用_.difference
   _.without = function(array) {
     return _.difference(array, slice.call(arguments, 1));
   };
@@ -672,7 +674,13 @@
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
   // Aliased as `unique`.
+  /**
+   * 数组去重
+   * @param {Array} array 待去重数组
+   * @param {Boolean} isSorted 数组是否已经排序，针对排序数组会应用更快的算法
+   */
   _.uniq = _.unique = function(array, isSorted, iteratee, context) {
+    // isSorted作为可选参数
     if (!_.isBoolean(isSorted)) {
       context = iteratee;
       iteratee = isSorted;
@@ -683,16 +691,26 @@
     var seen = [];
     for (var i = 0, length = getLength(array); i < length; i++) {
       var value = array[i],
+          // 如果传了iteratee，就比较iteratee计算值去重
           computed = iteratee ? iteratee(value, i, array) : value;
       if (isSorted) {
+        // 排序数组，1,1,1,2,3
+        // 取第1个元素（!i）和所有不等于前一项的元素（seen !== computed）
         if (!i || seen !== computed) result.push(value);
+        // seen保存上一项，便于与下次循环当前项（computed）比较
         seen = computed;
-      } else if (iteratee) {
+      } 
+      // 未排序数组，但有计算规则
+      else if (iteratee) {
+        // seen缓存去重后的计算值数组，根据计算值判断
+        // 原始值还是push到result中
         if (!_.contains(seen, computed)) {
           seen.push(computed);
           result.push(value);
         }
-      } else if (!_.contains(result, value)) {
+      } 
+      // 未排序数组，原始值去重，直接判断原始值
+      else if (!_.contains(result, value)) {
         result.push(value);
       }
     }
@@ -701,21 +719,39 @@
 
   // Produce an array that contains the union: each distinct element from all of
   // the passed-in arrays.
+  // 取并集
+  // 可以传入任意个数组
   _.union = function() {
+    // 这里传给flatten的参数：true, true，浅扁平，严格模式
+    // 取的是传入数组的并集，所以扁平化一层就够了
+    // 严格模式可以过滤掉arguments中的非数组参数、callee等其他属性
     return _.uniq(flatten(arguments, true, true));
   };
 
   // Produce an array that contains every item shared between all the
   // passed-in arrays.
+
+  /**
+   * 取交集
+   * 可以传入任意个数组
+   * @param {Array} array 第一个数组，计算交集遍历第一个数组中的元素比较就可以
+   */
   _.intersection = function(array) {
     var result = [];
     var argsLength = arguments.length;
+    // 遍历第一个数组中的元素
     for (var i = 0, length = getLength(array); i < length; i++) {
       var item = array[i];
+      // 如果result结果中已经存在这个元素，就没必要再比较检验了，直接跳下一次循环
       if (_.contains(result, item)) continue;
+      // 遍历剩余所有的数组
+      // 因为交集需要剩余所有数组都有这个元素才可以
       for (var j = 1; j < argsLength; j++) {
+        // 一旦有某个数组没有这一项，那这一项已经不满足了，直接跳出循环
         if (!_.contains(arguments[j], item)) break;
       }
+      // 遍历完所有数组时j===argsLength
+      // 如果前面break过，条件不满足item不会被推到result中
       if (j === argsLength) result.push(item);
     }
     return result;
@@ -723,8 +759,14 @@
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
+  /**
+   * 取差集
+   * @param {Array} array 第一个数组
+   */
   _.difference = function(array) {
+    // 不需要操作第1个数组，flatten的第4个参数发挥作用了
     var rest = flatten(arguments, true, true, 1);
+    // 选择其余数组中不存在的元素
     return _.filter(array, function(value){
       return !_.contains(rest, value);
     });
@@ -764,22 +806,27 @@
   };
 
   // Generator function to create the findIndex and findLastIndex functions
-  // 根据方向查找索引位置
+  // 根据方向生成索引查找函数（_.findIndex、_.findLastIndex）
   // 又见到这样的抽象，区别只是遍历方向和起始遍历位置
   function createPredicateIndexFinder(dir) {
     return function(array, predicate, context) {
+      // 包装判定函数
       predicate = cb(predicate, context);
       var length = getLength(array);
       var index = dir > 0 ? 0 : length - 1;
       for (; index >= 0 && index < length; index += dir) {
+        // 通过判定函数，返回当前索引
         if (predicate(array[index], index, array)) return index;
       }
+      // 所有项都未通过判定，返回-1
       return -1;
     };
   }
 
   // Returns the first index on an array-like that passes a predicate test
+  // 根据规则查找元素的索引，返回第一个满足条件的索引
   _.findIndex = createPredicateIndexFinder(1);
+  // 类似_.findIndex，从最后一个元素开始查
   _.findLastIndex = createPredicateIndexFinder(-1);
 
   // Use a comparator function to figure out the smallest index at which
