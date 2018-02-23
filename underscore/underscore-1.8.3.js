@@ -774,17 +774,26 @@
 
   // Zip together multiple lists into a single array -- elements that share
   // an index go together.
+  // 
+  // 感觉可以理解成一个矩阵，原来的数组取每一行作为一个元素，转换后的数组取每一列作为一个元素
+  // _.zip和_.unzip两个方法作用是一样的，接收参数不一样
+  // _.zip(['moe', 'larry', 'curly'], [30, 40, 50], [true, false, false]);
+  // => [["moe", 30, true], ["larry", 40, false], ["curly", 50, false]]
   _.zip = function() {
     return _.unzip(arguments);
   };
 
   // Complement of _.zip. Unzip accepts an array of arrays and groups
   // each array's elements on shared indices
+  // 
+  // _.unzip([["moe", 30, true], ["larry", 40, false], ["curly", 50, false]]);
+  // => [['moe', 'larry', 'curly'], [30, 40, 50], [true, false, false]]
   _.unzip = function(array) {
     var length = array && _.max(array, getLength).length || 0;
     var result = Array(length);
 
     for (var index = 0; index < length; index++) {
+      // 取每一项的索引位置的元素组成一个新数组
       result[index] = _.pluck(array, index);
     }
     return result;
@@ -793,12 +802,22 @@
   // Converts lists into objects. Pass either a single array of `[key, value]`
   // pairs, or two parallel arrays of the same length -- one of keys, and one of
   // the corresponding values.
+  // 转换成对象
+  // 接收两种参数形式：
+  // 1.两个数组：keys数组和values数组
+  // _.object(['moe', 'larry', 'curly'], [30, 40, 50]);
+  // => {moe: 30, larry: 40, curly: 50}
+  // 2.一个数组：keys&values作为一个元素
+  // _.object([['moe', 30], ['larry', 40], ['curly', 50]]);
+  // => {moe: 30, larry: 40, curly: 50}
   _.object = function(list, values) {
     var result = {};
     for (var i = 0, length = getLength(list); i < length; i++) {
       if (values) {
+        // 传了values数组，取list的每一项作为键，values的每一项作为值
         result[list[i]] = values[i];
       } else {
+        // 只传了list数组，取list每一项的第一个元素作为键，第二个元素作为值
         result[list[i][0]] = list[i][1];
       }
     }
@@ -831,19 +850,33 @@
 
   // Use a comparator function to figure out the smallest index at which
   // an object should be inserted so as to maintain order. Uses binary search.
+  // 计算给定项插入一个有序数组的位置
+  // 接收iteratee作为计算函数
   _.sortedIndex = function(array, obj, iteratee, context) {
+    // 生成计算函数
     iteratee = cb(iteratee, context, 1);
     var value = iteratee(obj);
     var low = 0, high = getLength(array);
     while (low < high) {
+      // 计算中间项位置
       var mid = Math.floor((low + high) / 2);
+      // 如果中间项的值<待插入项的值，取数组后半部分继续循环，否则取前半部分
       if (iteratee(array[mid]) < value) low = mid + 1; else high = mid;
     }
     return low;
   };
 
   // Generator function to create the indexOf and lastIndexOf functions
+  /**
+   * 生成查找位置的函数
+   * @param {Number} dir 查找方向 1|-1
+   * @param {Function} predicateFind 判定函数
+   * @param {Function} sortedIndex 
+   */
   function createIndexFinder(dir, predicateFind, sortedIndex) {
+    /**
+     * @param {Number} idx 起始查找位置
+     */
     return function(array, item, idx) {
       var i = 0, length = getLength(array);
       if (typeof idx == 'number') {
@@ -877,16 +910,28 @@
   // Generate an integer Array containing an arithmetic progression. A port of
   // the native Python `range()` function. See
   // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  // 
+  /**
+   * 生成一个整数数组
+   * @param {Number} start 可选参数，起始值，默认为0
+   * @param {Number} stop 结束值
+   * @param {Number} step 可选参数，间隔，默认为1
+   */
   _.range = function(start, stop, step) {
+    // 如果只传了一个参数，这个参数会作为stop使用，而start置为0
+    // 即生成一个0~start的数组
     if (stop == null) {
       stop = start || 0;
       start = 0;
     }
+    // step默认值为1
     step = step || 1;
 
+    // 计算结果数组的长度
     var length = Math.max(Math.ceil((stop - start) / step), 0);
     var range = Array(length);
 
+    // 循环，给数组赋值
     for (var idx = 0; idx < length; idx++, start += step) {
       range[idx] = start;
     }
