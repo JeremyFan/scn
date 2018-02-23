@@ -869,23 +869,32 @@
   // Generator function to create the indexOf and lastIndexOf functions
   /**
    * 生成查找位置的函数
-   * @param {Number} dir 查找方向 1|-1
+   * @param {Number} dir 查找方向 1|-1 正向|反向
    * @param {Function} predicateFind 判定函数
    * @param {Function} sortedIndex 
    */
   function createIndexFinder(dir, predicateFind, sortedIndex) {
     /**
-     * @param {Number} idx 起始查找位置
+     * @param {Number|Boolean} idx 传number时，作为起始查找位置使用，传true时，代表数组是有序的，使用二分法查找
      */
     return function(array, item, idx) {
       var i = 0, length = getLength(array);
+      // idx传了数值，作为起始数值使用
       if (typeof idx == 'number') {
+        // 根据遍历方向dir和起始位置idx计算开始遍历的位置
         if (dir > 0) {
+            // 正向，idx为正数 -> 从idx开始遍历
+            // 正向，idx为负数 -> 从idx+length开始遍历，即从后往前算idx的绝对值个项，如果idx+length是个负数，就从第一项开始遍历
             i = idx >= 0 ? idx : Math.max(idx + length, i);
         } else {
+            // 反向，idx为正数 -> 从idx+1开始（往前）遍历，如果这个值大于数组长度了，就还是数组长度
+            // 反向，idx为负数 -> 从idx+length+1开始（往前）遍历，还是从后往前算idx的绝对值个项
             length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
         }
-      } else if (sortedIndex && idx && length) {
+      } 
+      // idx为true
+      else if (sortedIndex && idx && length) {
+        // 调用_.sortedIndex计算item的位置
         idx = sortedIndex(array, item);
         return array[idx] === item ? idx : -1;
       }
@@ -893,6 +902,8 @@
         idx = predicateFind(slice.call(array, i, length), _.isNaN);
         return idx >= 0 ? idx + i : -1;
       }
+      // 正向从第一项（i）开始遍历
+      // 负向从第二项（length-1）开始遍历
       for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
         if (array[idx] === item) return idx;
       }
