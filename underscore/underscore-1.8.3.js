@@ -898,7 +898,9 @@
         idx = sortedIndex(array, item);
         return array[idx] === item ? idx : -1;
       }
+      // 如果要查找一个非数值（NaN）
       if (item !== item) {
+        // 调用_.findIndex/_.findLastIndex，传入判定函数_.isNaN
         idx = predicateFind(slice.call(array, i, length), _.isNaN);
         return idx >= 0 ? idx + i : -1;
       }
@@ -956,7 +958,9 @@
   // Determines whether to execute a function as a constructor
   // or a normal function with the provided arguments
   var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
+    // 直接调用函数，callingContext是window
     if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
+    // 作为构造函数使用
     var self = baseCreate(sourceFunc.prototype);
     var result = sourceFunc.apply(self, args);
     if (_.isObject(result)) return result;
@@ -967,10 +971,13 @@
   // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
   // available.
   _.bind = function(func, context) {
+    // 优先使用原生bind方法
     if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
     if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
+    // _.bind的参数
     var args = slice.call(arguments, 2);
     var bound = function() {
+      // arguments为调用时传的参数，调用时放在_.bind的参数后面
       return executeBound(func, bound, context, this, args.concat(slice.call(arguments)));
     };
     return bound;
