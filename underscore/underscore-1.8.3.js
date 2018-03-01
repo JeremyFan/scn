@@ -986,14 +986,31 @@
   // Partially apply a function by creating a version that has had some of its
   // arguments pre-filled, without changing its dynamic `this` context. _ acts
   // as a placeholder, allowing any combination of arguments to be pre-filled.
+  /**
+   * 偏函数
+   * @param {Function} func 原始函数
+   * @param arguments 填充参数，如果传`_`，代表这个位置的参数不被填充
+   * 
+   * boundArgs [_, 20]
+   * length 2
+   * args [ , ]
+   * arguments [5]
+   * args[0] = arguments[0] = 5, position=1
+   */
   _.partial = function(func) {
+    // 取参数
     var boundArgs = slice.call(arguments, 1);
     var bound = function() {
+      // boundArgs 调用_.partial传的填充参数
+      // arguments 调用偏函数时传的参数
+      // args 拼装后的参数
       var position = 0, length = boundArgs.length;
       var args = Array(length);
       for (var i = 0; i < length; i++) {
+        // 如果传了`_`，这个位置接收的就是调用偏函数的参数，否则接收的是之前的填充参数
         args[i] = boundArgs[i] === _ ? arguments[position++] : boundArgs[i];
       }
+      // 处理剩余的参数
       while (position < arguments.length) args.push(arguments[position++]);
       return executeBound(func, bound, this, this, args);
     };
