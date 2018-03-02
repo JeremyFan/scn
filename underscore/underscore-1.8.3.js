@@ -1020,9 +1020,15 @@
   // Bind a number of an object's methods to that object. Remaining arguments
   // are the method names to be bound. Useful for ensuring that all callbacks
   // defined on an object belong to it.
+  /**
+   * 为对象的多个方法绑定上下文
+   * @param {Object} obj 需要绑定的上下文
+   * @param arguments 后续传入的都是需要绑定的方法
+   */
   _.bindAll = function(obj) {
     var i, length = arguments.length, key;
     if (length <= 1) throw new Error('bindAll must be passed function names');
+    // 遍历传入的方法
     for (i = 1; i < length; i++) {
       key = arguments[i];
       obj[key] = _.bind(obj[key], obj);
@@ -1031,10 +1037,20 @@
   };
 
   // Memoize an expensive function by storing its results.
+  /**
+   * 生成一个可以缓存返回值的参数
+   * @param {Function} func 原函数
+   * @param {Function} hasher 哈希函数，计算缓存key
+   * 
+   * hasher参数可以省略，默认使用第一个参数作为缓存key
+   * 所以如果原函数接收多个参数，不传hasher会有问题
+   */
   _.memoize = function(func, hasher) {
     var memoize = function(key) {
       var cache = memoize.cache;
+      // 通过hash函数计算或使用第一个参数作为缓存key
       var address = '' + (hasher ? hasher.apply(this, arguments) : key);
+      // 缓存中没有，调用函数写入缓存
       if (!_.has(cache, address)) cache[address] = func.apply(this, arguments);
       return cache[address];
     };
@@ -1044,7 +1060,14 @@
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
+  /**
+   * 延迟执行一个函数
+   * @param {Function} func 原函数
+   * @param {Number} wait 延迟时间
+   * @param arguments 原函数参数
+   */
   _.delay = function(func, wait) {
+    // 取原函数参数
     var args = slice.call(arguments, 2);
     return setTimeout(function(){
       return func.apply(null, args);
@@ -1053,6 +1076,13 @@
 
   // Defers a function, scheduling it to run after the current call stack has
   // cleared.
+  /**
+   * 相当于setTimeout(fn, 1)的效果
+   * @param {Function} func 原函数
+   * @param arguments 原函数参数
+   * 
+   * 调用_.partial生成偏函数，第一个参数func需要接收，使用_占位，第二个参数wait传1
+   */
   _.defer = _.partial(_.delay, _, 1);
 
   // Returns a function, that, when invoked, will only be triggered at most once
