@@ -1187,6 +1187,7 @@
   };
 
   // Returns a function that will only be executed on and after the Nth call.
+  // 生成一个函数，调用到第times次后才会执行
   _.after = function(times, func) {
     return function() {
       if (--times < 1) {
@@ -1196,19 +1197,29 @@
   };
 
   // Returns a function that will only be executed up to (but not including) the Nth call.
+  // 生成一个函数，只在调用times次前执行，从第times次开始后续的调用只使用times-1次的返回值
   _.before = function(times, func) {
+    // 缓存返回值
     var memo;
     return function() {
       if (--times > 0) {
         memo = func.apply(this, arguments);
       }
+      // 解除func引用
       if (times <= 1) func = null;
+      // 后续都使用memo作为返回值
       return memo;
     };
   };
 
   // Returns a function that will be executed at most one time, no matter how
   // often you call it. Useful for lazy initialization.
+  // 生成一个只能调用一次的函数
+  // 文章中的典型场景：
+  // var initialize = _.once(createApplication);
+  // initialize();
+  // initialize();
+  // Application is only created once.
   _.once = _.partial(_.before, 2);
 
   // Object Functions
