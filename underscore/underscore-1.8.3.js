@@ -1090,6 +1090,13 @@
   // as much as it can, without ever going more than once per `wait` duration;
   // but if you'd like to disable the execution on the leading edge, pass
   // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  /**
+   * 生成节流函数
+   * 在给定时间内只执行一次函数 
+   * @param {Function} func 原函数
+   * @param {Number} wait 节流间隔毫秒数
+   * @param {Object} options 
+   */
   _.throttle = function(func, wait, options) {
     var context, args, result;
     var timeout = null;
@@ -1126,6 +1133,12 @@
   // be triggered. The function will be called after it stops being called for
   // N milliseconds. If `immediate` is passed, trigger the function on the
   // leading edge, instead of the trailing.
+  /**
+   * 生成防抖函数
+   * @param {Function} func 原函数
+   * @param {Number} wait 防抖毫秒数
+   * @param {Boolean} immediate 
+   */
   _.debounce = function(func, wait, immediate) {
     var timeout, args, context, timestamp, result;
 
