@@ -1228,7 +1228,7 @@
   // Returns a function that will be executed at most one time, no matter how
   // often you call it. Useful for lazy initialization.
   // 生成一个只能调用一次的函数
-  // 文章中的典型场景：
+  // 文档中的典型场景：
   // var initialize = _.once(createApplication);
   // initialize();
   // initialize();
