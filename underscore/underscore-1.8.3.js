@@ -1096,13 +1096,17 @@
    * @param {Function} func 原函数
    * @param {Number} wait 节流间隔毫秒数
    * @param {Object} options 
+   *  默认情况下，节流函数第一次、或者超过节流间隔时，调用会立即执行，如果要禁止这个行为，传入{leading:false}
+   *  默认情况下，节流函数在时间间隔内调用会延迟到时间间隔结束后调用，如果要禁止这个行为，传入{trailing:false}
    */
   _.throttle = function(func, wait, options) {
     var context, args, result;
     var timeout = null;
     var previous = 0;
     if (!options) options = {};
+    // 执行函数（供延迟调用）
     var later = function() {
+      // leading为false时，previous置为0，调用时会再走previous=now的逻辑，延迟执行
       previous = options.leading === false ? 0 : _.now();
       timeout = null;
       result = func.apply(context, args);
@@ -1110,11 +1114,19 @@
     };
     return function() {
       var now = _.now();
+      // !previous 第一次调用
+      // options.leading === false 禁止调用立即执行。原本previous是0，满足执行条件的，这时候previous是now了，还得等wait时间
       if (!previous && options.leading === false) previous = now;
+      // 计算剩余时间
+      // remaning<=0代表已经超过节流间隔了
+      // remaning>0时的值代表需要延迟执行的时间
       var remaining = wait - (now - previous);
       context = this;
       args = arguments;
+      // remaining<=0 等待时间已经超过节流间隔
+      // remaining > wait 这个不理解，now-previous是个负数？now时间在previous前面？
       if (remaining <= 0 || remaining > wait) {
+        // 清空定时器，立即执行函数
         if (timeout) {
           clearTimeout(timeout);
           timeout = null;
@@ -1122,7 +1134,10 @@
         previous = now;
         result = func.apply(context, args);
         if (!timeout) context = args = null;
-      } else if (!timeout && options.trailing !== false) {
+      } 
+      // !timeout 未设置定时器，如果已经设置就不用再设置了，这样节流间隔内多次调用最终到了时间只执行一次
+      // options.trailing !== false 没有禁止延迟执行。如果禁止延迟执行，效果是在节流间隔内的调用会失效，只有间隔外的调用会立即执行
+      else if (!timeout && options.trailing !== false) {
         timeout = setTimeout(later, remaining);
       }
       return result;
@@ -1188,12 +1203,19 @@
 
   // Returns a function that is the composition of a list of functions, each
   // consuming the return value of the function that follows.
+  /**
+   * 组合多个函数生成一个新函数，后一个函数的返回值作为前一个函数的参数
+   * 文档的解释比较好，组合f()，g()，h()，生成f(g(h()))
+   */
   _.compose = function() {
     var args = arguments;
+    // 从最后一个开始，因为前一个函数依赖后一个函数的返回值
     var start = args.length - 1;
     return function() {
       var i = start;
+      // 调用函数，保存返回值到result
       var result = args[start].apply(this, arguments);
+      // 使用result作为函数调用前一个函数
       while (i--) result = args[i].call(this, result);
       return result;
     };
