@@ -1095,7 +1095,7 @@
    * 在给定时间内只执行一次函数 
    * @param {Function} func 原函数
    * @param {Number} wait 节流间隔毫秒数
-   * @param {Object} options 
+   * @param {Object} options 支持{leading:false}、{leading:false}两种参数
    *  默认情况下，节流函数第一次、或者超过节流间隔时，调用会立即执行，如果要禁止这个行为，传入{leading:false}
    *  默认情况下，节流函数在时间间隔内调用会延迟到时间间隔结束后调用，如果要禁止这个行为，传入{trailing:false}
    */
@@ -1151,20 +1151,26 @@
   /**
    * 生成防抖函数
    * @param {Function} func 原函数
-   * @param {Number} wait 防抖毫秒数
-   * @param {Boolean} immediate 
+   * @param {Number} wait 防抖间隔毫秒数
+   * @param {Boolean} immediate 默认函数是在调用后经过防抖间隔才执行，如果传了immediate为true，会立即执行
    */
   _.debounce = function(func, wait, immediate) {
     var timeout, args, context, timestamp, result;
 
     var later = function() {
+      // 最后一次调用函数到现在经过了多长时间
       var last = _.now() - timestamp;
 
+      // 不足防抖时间
       if (last < wait && last >= 0) {
+        // 设置新定时器，wait-last是还需等待的时间
         timeout = setTimeout(later, wait - last);
-      } else {
+      } 
+      else {
         timeout = null;
+        // 如果设置immediate为true，那么函数之前已经立即执行过了，就不需要再执行了
         if (!immediate) {
+          // 时间到了，执行函数
           result = func.apply(context, args);
           if (!timeout) context = args = null;
         }
@@ -1174,8 +1180,11 @@
     return function() {
       context = this;
       args = arguments;
+      // 关键信息：调用函数的时间戳。每次调用函数更新
       timestamp = _.now();
+      // 如果设置immediate为true，如果当前不在防抖时间内（无timeout），下面就会执行函数
       var callNow = immediate && !timeout;
+      // 只设置一个定时器
       if (!timeout) timeout = setTimeout(later, wait);
       if (callNow) {
         result = func.apply(context, args);
