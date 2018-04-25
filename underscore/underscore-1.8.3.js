@@ -1657,6 +1657,10 @@
   };
 
   // Keep the identity function around for default iteratees.
+  /**
+   * 函数式编程中，很多情况下函数接收的参数是一个函数而不是固定值，这样可以有更大的灵活性
+   * _.identify不做任何操作，可以代替默认值的效果
+   */
   _.identity = function(value) {
     return value;
   };
