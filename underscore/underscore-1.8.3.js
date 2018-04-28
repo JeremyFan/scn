@@ -108,12 +108,21 @@
   };
 
   // An internal function for creating assigner functions.
+  /**
+   * 生成一个属性
+   * @param {*} keysFunc 取源对象属性的函数
+   * @param {*} undefinedOnly 是否只拷贝undefined属性，供_.defaults使用，_.defaults只
+   */
   var createAssigner = function(keysFunc, undefinedOnly) {
     return function(obj) {
+      // obj作为目标对象
+      // 这种模式很常见，实际接收很多个参数，但第一个参数（或前几个）有特殊意义，就直接在参数接收不用从arguments中获取
       var length = arguments.length;
       if (length < 2 || obj == null) return obj;
+      // 从第二个参数开始，每个对象都作为源对象
       for (var index = 1; index < length; index++) {
         var source = arguments[index],
+            // keysFunc决定需要拷贝哪些属性
             keys = keysFunc(source),
             l = keys.length;
         for (var i = 0; i < l; i++) {
@@ -1290,6 +1299,7 @@
 
     while (nonEnumIdx--) {
       prop = nonEnumerableProps[nonEnumIdx];
+      // 属性在对象中但不在原型中，说明在实例上
       if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
         keys.push(prop);
       }
@@ -1299,6 +1309,7 @@
   // Retrieve the names of an object's own properties.
   // Delegates to **ECMAScript 5**'s native `Object.keys`
   // 取对象的实例属性，优先使用ES5 Object.keys()方法
+  // _.keys是个非常常用的方法，很多基于对象的操作方法都是使用_.keys取到属性列表
   _.keys = function(obj) {
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
@@ -1322,7 +1333,7 @@
   };
 
   // Retrieve the values of an object's properties.
-  // 取对象的属性值列表
+  // 取对象的实例属性值列表
   _.values = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
@@ -1335,6 +1346,12 @@
 
   // Returns the results of applying the iteratee to each element of the object
   // In contrast to _.map it returns an object
+  /**
+   * 遍历对象，应用迭代器，返回一个新对象。类似数组的_.map
+   * @param {Object} obj 
+   * @param {Function} iteratee 
+   * @param {Object} context 
+   */
   _.mapObject = function(obj, iteratee, context) {
     iteratee = cb(iteratee, context);
     var keys =  _.keys(obj),
@@ -1349,9 +1366,14 @@
   };
 
   // Convert an object into a list of `[key, value]` pairs.
+  /**
+   * 把对象的每对属性、值转为[属性, 值]，返回一个包含所有属性的数组
+   * @param {Object} obj 
+   */
   _.pairs = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
+    // 又是新建一个固定长度的数组
     var pairs = Array(length);
     for (var i = 0; i < length; i++) {
       pairs[i] = [keys[i], obj[keys[i]]];
@@ -1360,6 +1382,10 @@
   };
 
   // Invert the keys and values of an object. The values must be serializable.
+  /**
+   * 翻转对象的属性和值
+   * @param {Object} obj 
+   */
   _.invert = function(obj) {
     var result = {};
     var keys = _.keys(obj);
@@ -1371,6 +1397,9 @@
 
   // Return a sorted list of the function names available on the object.
   // Aliased as `methods`
+  /**
+   * 返回对象中的函数属性列表
+   */
   _.functions = _.methods = function(obj) {
     var names = [];
     for (var key in obj) {
