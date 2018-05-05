@@ -1495,6 +1495,11 @@
   // Creates an object that inherits from the given prototype object.
   // If additional properties are provided then they will be added to the
   // created object.
+  /**
+   * 创建对象
+   * @param {Object} prototype 需要继承的原型对象
+   * @param {Object} props 附加属性
+   */
   _.create = function (prototype, props) {
     var result = baseCreate(prototype);
     if (props) _.extendOwn(result, props);
@@ -1502,6 +1507,7 @@
   };
 
   // Create a (shallow-cloned) duplicate of an object.
+  // 浅拷贝对象
   _.clone = function (obj) {
     if (!_.isObject(obj)) return obj;
     return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
@@ -1510,16 +1516,32 @@
   // Invokes interceptor with the obj, and then returns obj.
   // The primary purpose of this method is to "tap into" a method chain, in
   // order to perform operations on intermediate results within the chain.
+  /**
+   * 调用拦截器，返回对象
+   * @param {Object} obj 
+   * @param {Function} interceptor 拦截器函数
+   */
   _.tap = function (obj, interceptor) {
     interceptor(obj);
     return obj;
   };
 
   // Returns whether an object has a given set of `key:value` pairs.
+  /**
+   * 判断对象是否包含指定的键值对
+   * @param {Object} object 待判断对象
+   * @param {Object} attrs 键值对对象
+   */
   _.isMatch = function (object, attrs) {
+    // 先取到需要判断的属性
     var keys = _.keys(attrs), length = keys.length;
+    // 空对象，空键值对返回true
     if (object == null) return !length;
+    // Object(object)包一下，便于下面使用in操作符
     var obj = Object(object);
+    // 遍历检测属性，判断为false的条件：
+    // 1.属性值要相等
+    // 2.对象要有此属性
     for (var i = 0; i < length; i++) {
       var key = keys[i];
       if (attrs[key] !== obj[key] || !(key in obj)) return false;
