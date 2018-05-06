@@ -1226,7 +1226,8 @@
   // consuming the return value of the function that follows.
   /**
    * 组合多个函数生成一个新函数，后一个函数的返回值作为前一个函数的参数
-   * 文档的解释比较好，组合f()，g()，h()，生成f(g(h()))
+   * 函数式编程中另一种常见的构建函数的方法
+   * 文档的解释比较好：组合f()，g()，h()，生成f(g(h()))
    */
   _.compose = function () {
     var args = arguments;
@@ -1650,6 +1651,13 @@
 
   // Is a given array, string, or object empty?
   // An "empty" object has no enumerable own-properties.
+  /**
+   * 判断对象是否为空（empty）
+   * 1. ==null
+   * 2. 数组、字符串、参数对象length为0
+   * 3. 没有实例属性的对象
+   * @param {Object} obj 
+   */
   _.isEmpty = function (obj) {
     if (obj == null) return true;
     if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length === 0;
@@ -1657,7 +1665,9 @@
   };
 
   // Is a given value a DOM element?
+  // 判断对象是否为DOM元素
   _.isElement = function (obj) {
+    // nodeType为1时是元素
     return !!(obj && obj.nodeType === 1);
   };
 
@@ -1670,6 +1680,7 @@
   // Is a given variable an object?
   _.isObject = function (obj) {
     var type = typeof obj;
+    // !!obj解决typeof null是'object'的问题
     return type === 'function' || type === 'object' && !!obj;
   };
 
@@ -1682,6 +1693,7 @@
 
   // Define a fallback version of the method in browsers (ahem, IE < 9), where
   // there isn't any inspectable "Arguments" type.
+  // 根据有无callee属性判断是否是arguments对象，一种降级方案
   if (!_.isArguments(arguments)) {
     _.isArguments = function (obj) {
       return _.has(obj, 'callee');
@@ -1702,11 +1714,20 @@
   };
 
   // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  /**
+   * 是否是NaN
+   * 和原生isNaN不太一样：
+   * isNaN(undefined) // =>true
+   * _.isNaN(undefined) // =>false
+   * @param {Object} obj 
+   */
   _.isNaN = function (obj) {
     return _.isNumber(obj) && obj !== +obj;
   };
 
   // Is a given value a boolean?
+  // 是否为布尔值
+  // true、false、new Boolean()
   _.isBoolean = function (obj) {
     return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   };
@@ -1733,6 +1754,8 @@
 
   // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
   // previous owner. Returns a reference to the Underscore object.
+  // 防止`_`冲突，`_`仍使用原来的变量
+  // 使用方法：var __ = _.noConflict()
   _.noConflict = function () {
     root._ = previousUnderscore;
     return this;
