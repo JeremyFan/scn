@@ -1771,17 +1771,33 @@
   };
 
   // Predicate-generating functions. Often useful outside of Underscore.
+  /**
+   * 函数式编程的一种常见模式
+   * 返回一个返回固定值的函数
+   */
   _.constant = function (value) {
     return function () {
       return value;
     };
   };
 
+  /**
+   * 一个返回undefined的空函数。
+   * 使用场景：作为callback的默认值使用等
+   */
   _.noop = function () { };
 
+  /**
+   * 生成取对象属性的函数，详见property
+   * @param {String} key 属性值
+   */
   _.property = property;
 
   // Generates a function for a given object that returns a given property.
+  /**
+   * 同样是生成取对象属性的函数，但参数接收的是对象，以后都从这个对象取
+   * @param {Object} obj 对象
+   */
   _.propertyOf = function (obj) {
     return obj == null ? function () { } : function (key) {
       return obj[key];
@@ -1790,6 +1806,9 @@
 
   // Returns a predicate for checking whether an object has a given set of
   // `key:value` pairs.
+  /**
+   * 生成一个判断对象是否满足键值对的谓词函数
+   */
   _.matcher = _.matches = function (attrs) {
     attrs = _.extendOwn({}, attrs);
     return function (obj) {
@@ -1798,6 +1817,13 @@
   };
 
   // Run a function **n** times.
+  /**
+   * 执行一个函数n次
+   * @param {Number} n 执行次数
+   * @param {Function} iteratee 函数
+   * @param {Object} context 
+   * @return 函数返回值构成的数组
+   */
   _.times = function (n, iteratee, context) {
     var accum = Array(Math.max(0, n));
     iteratee = optimizeCb(iteratee, context, 1);
@@ -1817,6 +1843,9 @@
   };
 
   // A (possibly faster) way to get the current timestamp as an integer.
+  /**
+   * 取时间，优先使用 Date.now
+   */
   _.now = Date.now || function () {
     return new Date().getTime();
   };
