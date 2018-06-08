@@ -1403,6 +1403,7 @@
   // Aliased as `methods`
   /**
    * 返回对象中的函数属性列表
+   * 一个使用场景：混入一个对象的所有函数
    */
   _.functions = _.methods = function (obj) {
     var names = [];
@@ -1764,7 +1765,7 @@
   // Keep the identity function around for default iteratees.
   /**
    * 函数式编程中，很多情况下函数接收的参数是一个函数而不是固定值，这样可以有更大的灵活性
-   * _.identify不做任何操作，可以代替默认值的效果
+   * 固定值无法扩展，而_.identify不做任何操作，可以代替固定值的效果
    */
   _.identity = function (value) {
     return value;
@@ -1998,6 +1999,9 @@
   // If Underscore is called as a function, it returns a wrapped object that
   // can be used OO-style. This wrapper holds altered versions of all the
   // underscore functions. Wrapped objects may be chained.
+  // `_`支持以函数形式调用，返回一个包装后的对象
+  // 包装对象支持所有underscore的函数
+  // 
 
   // Helper function to continue chaining intermediate results.
   var result = function (instance, obj) {
@@ -2005,6 +2009,10 @@
   };
 
   // Add your own custom functions to the Underscore object.
+  /**
+   * 混入自定义函数
+   * @param {Object} obj 
+   */
   _.mixin = function (obj) {
     _.each(_.functions(obj), function (name) {
       var func = _[name] = obj[name];
@@ -2017,6 +2025,7 @@
   };
 
   // Add all of the Underscore functions to the wrapper object.
+  // 混入所有underscore函数
   _.mixin(_);
 
   // Add all mutator Array functions to the wrapper.
